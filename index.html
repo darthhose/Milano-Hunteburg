@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pizzeria Milano Hunteburg – Speisekarte</title>
+<style>
+  :root { --gruen:#2e7d32; --rot:#c62828; --creme:#f7f0df; --karte:#fffdf6; --linie:#e5d9b8; --text:#2a2a2a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Georgia, "Times New Roman", serif; background:var(--creme); color:var(--text); line-height:1.4; }
+  header { text-align:center; padding:26px 16px 18px; background:linear-gradient(90deg,var(--gruen) 0 33%, #fff 33% 66%, var(--rot) 66% 100%); }
+  header .box { display:inline-block; background:rgba(255,255,255,.92); padding:10px 30px; border-radius:10px; }
+  header .pz { font-size:1.1rem; letter-spacing:.1em; text-transform:uppercase; }
+  header h1 { margin:0; font-size:2.8rem; font-style:italic; line-height:1; }
+  header .ort { letter-spacing:.1em; }
+  header .adr { margin-top:6px; font-size:.95rem; }
+  nav { position:sticky; top:0; z-index:10; background:var(--gruen); padding:8px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  nav a { color:#fff; text-decoration:none; font-size:.9rem; padding:5px 11px; border-radius:14px; background:rgba(255,255,255,.15); }
+  nav a:hover { background:var(--rot); }
+  .search { max-width:960px; margin:16px auto 0; padding:0 16px; }
+  .search input { width:100%; padding:10px 14px; font-size:1rem; border:2px solid var(--linie); border-radius:8px; background:#fff; }
+  main { max-width:960px; margin:0 auto; padding:8px 16px 30px; }
+  section { margin-top:28px; }
+  h2 { color:var(--rot); font-style:italic; border-bottom:2px solid var(--gruen); padding-bottom:4px; margin-bottom:4px; }
+  .hinweis { font-size:.88rem; color:#555; margin:4px 0 6px; }
+  .kopf, .item { display:flex; gap:10px; align-items:baseline; padding:8px 6px; }
+  .kopf { justify-content:flex-end; font-size:.78rem; color:#777; padding-bottom:0; }
+  .item { background:var(--karte); border-bottom:1px solid var(--linie); }
+  .nr { min-width:2.6em; color:#999; font-size:.85rem; text-align:right; }
+  .txt { flex:1; }
+  .name { font-weight:700; }
+  .desc { font-size:.88rem; color:#555; font-family:Segoe UI, Roboto, Arial, sans-serif; }
+  .preise { display:flex; gap:6px; }
+  .preis { font-weight:700; white-space:nowrap; text-align:right; min-width:4.6em; font-family:Segoe UI, Roboto, Arial, sans-serif; }
+  .kopf .preis { font-weight:400; }
+  .info { max-width:960px; margin:0 auto; padding:0 16px 40px; }
+  .box2 { background:#fff; border:2px solid var(--linie); border-radius:10px; padding:14px 18px; margin:18px 0; }
+  .box2 h3 { margin:0 0 6px; color:var(--gruen); }
+  .box2 table { border-collapse:collapse; }
+  .box2 td { padding:2px 16px 2px 0; }
+  .fuss { font-size:.82rem; color:#555; margin-top:8px; }
+  .hidden { display:none !important; }
+  @media (max-width:520px) { .preis { min-width:3.9em; font-size:.92rem; } }
+  @media print { nav, .search { display:none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="box">
+    <div class="pz">Pizzeria</div>
+    <h1>Milano</h1>
+    <div class="ort">Hunteburg</div>
+    <div class="adr">Hauptstr. 4, 49163 Hunteburg · <strong>Tel.: 05475 / 874</strong></div>
+  </div>
+</header>
+
+<nav id="nav"></nav>
+<div class="search"><input id="suche" type="search" placeholder="Gericht suchen (Name, Nummer oder Zutat) …"></div>
+<main id="menue"></main>
+
+<div class="info">
+  <div class="box2">
+    <h3>Öffnungszeiten</h3>
+    <table>
+      <tr><td>Mo.</td><td>17:00 – 21:00 Uhr</td></tr>
+      <tr><td>Do. – Sa.</td><td>17:00 – 21:30 Uhr</td></tr>
+      <tr><td>So. / Feiertag</td><td>12:00 – 21:30 Uhr</td></tr>
+    </table>
+    <div class="fuss">Hauptstr. 4 · 49163 Hunteburg · Tel.: 05475 / 874</div>
+  </div>
+  <div class="fuss">
+    ** Da der Teig während des Backvorgangs in der Form arbeitet, sind geringe Größendifferenzen möglich.<br>
+    * Al Italiana: dünner Teig mit Mozzarella und Olivenöl.
+  </div>
+</div>
+
+<script>
+// Preise exakt wie auf der Karte (Strings). Pro Abschnitt: spalten = Beschriftung der Preisspalten.
+const KARTE = [
+ { id:"antipasti", titel:"Antipasti / Vorspeisen", items:[
+  ["","Mozzarella Caprese","Mozzarella mit frischen Tomaten und frischem Basilikum",["12,00"]],
+  ["","Schafskäse naturell","Feta-Käse mit Zwiebeln, Oliven und milden Peperoni garniert",["12,00"]],
+  ["","Schafskäse al Forno","Feta-Käse, Tomaten, Peperoni und Zwiebeln überbacken",["12,00"]],
+  ["","Pizzabrot Bruschetta-Art","Pizzabrot mit frischen Tomaten, Mozzarella, Basilikum und Knoblauch",["12,00"]]
+ ]},
+ { id:"salate", titel:"Insalate / Salate", items:[
+  ["33","Citrioli","Gurkensalat mit Zwiebeln",["7,00"]],
+  ["34","Verde","gem. Blattsalat mit Zwiebeln",["7,00"]],
+  ["35","Pomodoro","Tomatensalat mit Zwiebeln",["7,00"]],
+  ["36","Mista","gem. Blattsalat, Tomaten, Karotten, Gurken, Thunfisch",["10,00"]],
+  ["37","Della Casa","gem. Blattsalat, Tomaten, Gurken, Karotten, Ei, Hinterschinken, Käse",["12,00"]],
+  ["38","Insalata Gambero","gem. Blattsalat, Gurken, Tomaten, Krabben, frische Champignons, Mais, Bohnen",["13,00"]],
+  ["71","Insalata Mediterrane","gem. Blattsalat, Tomaten, Gurken, milde Peperoni, Feta-Käse, Oliven",["11,00"]],
+  ["72","Insalata Pollo","gem. Blattsalat, Tomaten, Gurken, Hähnchenbrustfilet, Mais, Paprika, in Joghurtdressing",["13,00"]],
+  ["74","Insalata Marinara","gem. Blattsalat, Sardellen, Oliven, Tomaten, Gurken, Ei, Thunfisch, Kapern",["13,00"]],
+  ["76","Insalata Gustosa","gem. Blattsalat, Tomaten, Gurken, Mais, Rucola und in Curryöl gebratenes Hähnchenbrustfilet",["13,00"]]
+ ]},
+ { id:"pizza", titel:"Pizza / Pizza**", spalten:["klein","mittel","groß"], hinweis:"Extrabeläge für Pizza: 2,00 €. Al Italiana*: dünner Teig mit Mozzarella und Olivenöl.", items:[
+  ["6","Pizza Margherita","Tomate, doppelt Käse, Oregano (Al Italiana-Variante mit Basilikum)",["8,50","10,00","12,00"]],
+  ["7","Pizza Marinara","Tomate, Käse, Sardellenfilet, Oregano, Kapern, Oliven",["10,00","11,50","13,00"]],
+  ["8","Pizza Cipolle","Tomate, Käse, frische Zwiebeln, Oregano",["10,00","11,50","13,00"]],
+  ["9","Pizza Paprika","Tomate, Käse, frische Paprika, Oregano",["10,00","11,50","13,00"]],
+  ["10","Pizza Salami","Tomate, Käse, Salami, Oregano",["10,00","11,50","13,00"]],
+  ["11","Pizza Funghi","Tomate, Käse, fr. Champignons, Oregano",["10,00","11,50","13,00"]],
+  ["12","Pizza Prosciutto","Tomate, Käse, orig. Hinterschinken, Oregano",["10,00","11,50","13,00"]],
+  ["13","Pizza Tonno","Tomate, Käse, Thunfisch in Öl, Zwiebeln, Oregano",["11,00","12,50","13,50"]],
+  ["14","Pizza Chef","Tomate, Käse, Salami, fr. Champignons, Hinterschinken, Oregano",["10,50","12,00","13,00"]],
+  ["15","Pizza Scampi","Tomate, Käse, Garnelen, frische Tomaten, Gamberetti, Knoblauch, Oregano",["12,00","13,50","14,50"]],
+  ["16","Pizza Gladiatore","Tomate, Käse, fr. Champignons, Hinterschinken, Thunfisch in Öl, Oregano",["11,00","12,50","14,00"]],
+  ["17","Pizza Capricciosa","Tomate, Käse, fr. Champignons, Hinterschinken, Artischocken in Öl, Oregano",["11,00","12,50","14,00"]],
+  ["18","Pizza Hawaii","Tomate, Käse, Hinterschinken, Ananas",["10,50","12,00","13,00"]],
+  ["19","Pizza Quattro Stagioni","Tomate, Käse, Hinterschinken, fr. Champignons, Muscheln, Oliven, Oregano",["11,00","12,50","13,50"]],
+  ["20","Calzone","Tomate, Käse, Hinterschinken, fr. Paprika, Salami, fr. Champignons, Oliven, Oregano",["13,00"]],
+  ["22","Pizza Vegetariana","Tomate, Käse, frische Pilze, Artischocken in Öl, Zwiebeln, fr. Paprika, Oregano",["10,50","12,00","13,00"]],
+  ["23","Pizza Italia","Tomate, Käse, Broccoli, fr. Paprika, Spargel, Oregano",["10,50","12,00","14,00"]],
+  ["24","Pizza O Sole Mio","Tomate, Käse, Hinterschinken, Spargel, Ei, Oregano",["11,00","12,50","14,00"]],
+  ["25","Pizza Hollo Bollo","Bolognesesauce, Käse, Oregano, Sc. Hollandaise",["10,50","12,00","13,50"]],
+  ["26","Pizza Gamberetti","Tomate, Käse, Gamberetti, Knoblauch, Oregano",["11,00","12,50","14,00"]],
+  ["27","Pizza Bosco","Tomate, Käse, Hackfleisch, Zwiebeln, Pfifferlinge, Knoblauch, Oregano",["11,00","12,50","14,00"]],
+  ["28","Pizza Gorgonzola","Tomate, Gorgonzolakäse, Käse, Spinat, Oregano",["10,50","12,00","14,00"]],
+  ["29","Pizza Sandra","Tomate, Käse, Hinterschinken, fr. Champignons, fr. Paprika, Oregano",["11,00","12,50","14,50"]],
+  ["30","Fuoco (Vorsicht! Scharf wie Feuer!)","Salami, Käse, Tabasco, scharfe Peperoni, Knoblauch, Oregano",["10,00","11,50","13,50"]],
+  ["31","Sei Formaggi","Tomate, Edamer, Mozzarella, Gorgonzola, Ricotta, Feta und Camembert",["10,50","12,00","14,00"]],
+  ["32","Pizza Dolce","Tomate, Käse, Hinterschinken, Ananas, Camembert",["11,00","11,50","13,50"]],
+  ["61","Pizza Ricotta","Tomate, Käse, Hinterschinken, Spinat, Ricotta, Oregano",["10,50","12,00","14,00"]],
+  ["62","Pizza Salmone","Tomate, Käse, geräucherter Lachs, Ei, Oregano",["11,00","12,50","14,00"]],
+  ["63","Pizza Rustica","Bolognese, Käse, Salami, fr. Champignons, Oregano",["11,50","12,00","14,00"]],
+  ["64","Pizza Hähnchen","Tomate, Käse, Hähnchenbrustfilet, Zwiebeln, Feta, Oliven, Peperoni mild",["11,00","12,50","14,00"]],
+  ["65","Pizza alle Verdure","Tomate, Käse, gegrillte Auberginen und Zucchini, Knoblauch, Oregano",["10,00","11,50","13,00"]],
+  ["66","Pizza Gyros","Tomate, Käse, Hähnchengyros, Zwiebeln, Oregano",["11,50","13,00","14,00"]],
+  ["67","Pizza Mexicana","Tomate, Käse, Hackfleisch, Kidneybohnen, Mais, Paprika, Curry, Oregano",["11,00","12,50","14,00"]],
+  ["68","Pizza Speciale","Tomate, Käse, gegrillte Auberginen, scharfe Salami (Spianata Calabrese), Pfifferlinge, fr. Champignons, Zwiebeln",["11,50","12,50","14,00"]],
+  ["69","Pizza Mafia (scharf)","Tomate, Käse, Hackfleisch, Zwiebeln, scharfe Peperoni, Knoblauch, Oregano",["10,50","12,00","14,00"]],
+  ["70","Pizza Heino (scharf)","Tomate, Käse, Hinterschinken, scharfe Salami (Spianata Calabrese), Oliven, Knoblauch, Oregano",["11,50","13,00","14,50"]],
+  ["81","Pizza Spianata","Tomate, Käse, scharfe Salami (Spianata Calabrese), Oregano",["10,50","12,00","14,00"]],
+  ["82","Pizza Pollo","Tomate, Käse, Hähnchenbrustfilet in Curry-Sahnesoße, Ananas",["10,50","12,00","14,00"]],
+  ["83","Pizza Rucola","Tomate, Käse, frische Tomaten, Rucola und Parmesan",["10,50","12,00","14,00"]],
+  ["84","Pizza Insalata","Tomate, Käse, nach dem Backen mit gem. Salat und Joghurtdressing belegt",["12,00","13,50","14,00"]],
+  ["85","Pastatasche","gefüllt mit Spaghetti Bolognese, Sauce Hollandaise und Käse",["13,00"]],
+  ["86","Pizza Frutti di Mare","Tomate, Käse, Meeresfrüchte und Knoblauch",["12,00","13,50","14,50"]]
+ ]},
+ { id:"pasta", titel:"Pasta / Nudeln", hinweis:"Alle Nudelgerichte auch „al Forno“: Extra 2,00 €.", items:[
+  ["41","Tortellini alla Panna","mit Hinterschinken in Sahnesauce",["11,50"]],
+  ["42","Penne con Broccoli","mit Broccoli in Sahnesauce",["11,00"]],
+  ["43","Penne all’ Gorgonzola","mit Gorgonzolakäse in Sahnesauce",["11,00"]],
+  ["44","Tortellini alla Campana","mit Hinterschinken, Bolognese und Erbsen in Sahnesauce",["11,50"]],
+  ["45","Spaghetti Gambero","mit Krabben, Weißwein, Sahne und Knoblauch",["11,50"]],
+  ["46","Spaghetti Bolognese","mit Bolognesesauce",["11,50"]],
+  ["47","Spaghetti all’ Frutti di Mare","mit Meeresfrüchten in Sahnesauce, Knoblauch",["12,50"]],
+  ["48","Spaghetti Carbonara","mit Hinterschinken, Ei in Sahnesauce",["11,50"]],
+  ["49","Spaghetti al Salmone","mit geräuchertem Lachs in Tomaten-Sahnesauce",["11,50"]],
+  ["50","Spaghetti Aglio, Olio e Peperoncino","mit Olivenöl, Knoblauch und scharfen Peperoni",["10,50"]],
+  ["53","Penne ai Quattro Formaggi","mit vier verschiedenen Käsesorten in Sahnesauce",["11,50"]],
+  ["57","Pasta Melanzane e Zucchini","Spaghetti mit Zucchini, Auberginen, Knoblauch in Sahnesauce",["11,50"]],
+  ["58","Pasta con Hähnchengyros","Penne mit Hähnchengyros in Tomaten-Brandy-Sahnesauce",["11,50"]],
+  ["59","Pasta Mexicana","Spaghetti mit Hackfleisch, Bohnen, Mais in Curry-Sahnesauce",["11,50"]],
+  ["91","Penne alla Verdure","Nudeln mit versch. gebr. Gemüse in Tomaten-Sahnesauce",["12,50"]],
+  ["93","Spaghetti al Tonno","mit Thunfisch in Sahnesauce und Knoblauch",["11,50"]]
+ ]},
+ { id:"pollo", titel:"Pollo / Hähnchen", items:[
+  ["94","Pollo ai Curry","mit Currysauce, Paprika, Champignons, Pasta, gemischtem Salat u. frischen Tomaten",["16,90"]],
+  ["95","Pollo ai Funghi","mit Champignons, Pasta, gemischtem Salat u. frischen Tomaten",["16,90"]],
+  ["96","Pollo ai Chili","mit Champignons, Pasta, gemischtem Salat u. frischen Tomaten, Kapern",["16,90"]]
+ ]},
+ { id:"panini", titel:"Panini / Pizzabrötchen", items:[
+  ["","Knochen / Pizzastangen","",["6,00"]],
+  ["","Panini / Pizzabrötchen","",["6,00"]],
+  ["","Panini mit doppelt Käse","",["8,50"]],
+  ["","Panini mit Salami und Käse","",["8,50"]],
+  ["","Panini mit Hinterschinken und Käse","",["8,50"]],
+  ["","Panini mit Thunfisch und Käse","",["8,50"]],
+  ["","Panini mit Fetakäse und Käse","",["8,50"]],
+  ["","Panini mit Mozzarella und Basilikum","",["8,50"]],
+  ["","Panini mit rotem Pesto und Ricotta","",["8,50"]],
+  ["","Panini mit fr. Champignons und Käse","",["8,50"]],
+  ["","Panini mit Hackfleisch und Käse","",["8,50"]],
+  ["","Panini mit Hähnchengyros und Käse","",["8,50"]],
+  ["","Panini mit Krabben, Käse, Knoblauch","",["8,50"]],
+  ["","Panini mit scharfer Salami","Spianata di Calabrese und Käse",["8,50"]],
+  ["","Panini mit fr. Tomaten, Rucola und Mozzarella","",["8,50"]],
+  ["","Panini mit Hinterschinken, Ananas und Käse","",["8,00"]],
+  ["","Panini mit geräuchertem Lachs und Käse","",["8,50"]],
+  ["","Panini mit Gorgonzola und Spinat","",["8,50"]],
+  ["","Panini mit Nutella","",["8,50"]],
+  ["","Aioli (Knoblauchdip), Kräuterbutter oder Cocktailsauce","je Portion",["1,50"]],
+  ["","Extra für Panini","",["2,00"]]
+ ]},
+ { id:"party", titel:"Partyidee", hinweis:"Bitte einen Tag vorbestellen!", items:[
+  ["","Pizza XXL","ca. 50 cm für 4 Personen, Tomate und Käse – jedes weitere Extra 5,00 €",["25,00"]],
+  ["","Pizzablech klein","einfach belegt, für 5–6 Personen",["35,00"]],
+  ["","Pizzablech groß","einfach belegt, für 6–8 Personen",["45,00"]]
+ ]}
+];
+
+const menue = document.getElementById('menue');
+const nav = document.getElementById('nav');
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+KARTE.forEach(k => {
+  const a = document.createElement('a'); a.href = '#'+k.id; a.textContent = k.titel.split(' / ')[0]; nav.appendChild(a);
+  let h = `<section id="${k.id}"><h2>${esc(k.titel)}</h2>`;
+  if (k.hinweis) h += `<div class="hinweis">${esc(k.hinweis)}</div>`;
+  if (k.spalten) h += `<div class="kopf"><div class="preise">${k.spalten.map(s=>`<div class="preis">${s}</div>`).join('')}</div></div>`;
+  k.items.forEach(([nr,name,desc,preise]) => {
+    // Einzelpreis in Abschnitten mit mehreren Spalten (z. B. Calzone) steht in der letzten Spalte
+    const cells = (k.spalten && preise.length < k.spalten.length)
+      ? Array(k.spalten.length - preise.length).fill('').concat(preise) : preise;
+    h += `<div class="item"><div class="nr">${nr}</div><div class="txt"><div class="name">${esc(name)}</div>${desc?`<div class="desc">${esc(desc)}</div>`:''}</div><div class="preise">${cells.map(p=>`<div class="preis">${p?p+' €':''}</div>`).join('')}</div></div>`;
+  });
+  menue.insertAdjacentHTML('beforeend', h + '</section>');
+});
+
+document.getElementById('suche').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.item').forEach(el => el.classList.toggle('hidden', q && !el.textContent.toLowerCase().includes(q)));
+  document.querySelectorAll('main section').forEach(s => s.classList.toggle('hidden', q && !s.querySelector('.item:not(.hidden)')));
+});
+</script>
+</body>
+</html>
